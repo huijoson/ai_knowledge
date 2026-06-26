@@ -647,7 +647,7 @@
         // Fetch and Render Markdown
         async function loadBook() {
             try {
-                const response = await fetch('AI_Knowledge_Book.md');
+                const response = await fetch('AI_Knowledge_Book.md?t=' + new Date().getTime());
                 if (!response.ok) throw new Error('無法讀取 AI_Knowledge_Book.md，請確認檔案是否存在於同級目錄中');
                 let markdown = await response.text();
 
