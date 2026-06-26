@@ -32,6 +32,7 @@
             --accent-hover: #4f46e5;
             --border-color: rgba(255, 255, 255, 0.08);
             --code-bg: #1e293b;
+            --card-bg: #111827;
             --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             --font-mono: 'Fira Code', monospace;
         }
@@ -46,6 +47,7 @@
             --accent-hover: #3730a3;
             --border-color: rgba(0, 0, 0, 0.08);
             --code-bg: #f1f5f9;
+            --card-bg: #ffffff;
         }
 
         * {
@@ -135,7 +137,7 @@
 
         .toc-h1 { font-weight: 600; padding-left: 12px; }
         .toc-h2 { padding-left: 24px; font-size: 0.85rem; }
-        .toc-h3 { padding-left: 36px; font-size: 0.8rem; display: none; } /* Hide h3 for cleaner TOC */
+        .toc-h3 { padding-left: 36px; font-size: 0.8rem; display: none; }
 
         /* Main Content Styling */
         main {
@@ -171,7 +173,7 @@
             color: var(--text-primary);
             cursor: pointer;
             font-size: 1.2rem;
-            display: none; /* Show only on mobile */
+            display: none;
         }
 
         .theme-toggle-btn {
@@ -316,6 +318,228 @@
             color: var(--accent-color);
             display: block;
             margin-bottom: 4px;
+        }
+
+        /* Visualizer containers */
+        .interactive-visualizer {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 24px;
+            margin: 24px 0;
+        }
+
+        .visualizer-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .btn {
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background-color 0.2s;
+        }
+
+        .btn:hover {
+            background-color: var(--accent-hover);
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            border: 1px solid var(--accent-color);
+            color: var(--accent-color);
+        }
+
+        .btn-outline:hover {
+            background-color: var(--accent-color);
+            color: white;
+        }
+
+        /* CNN Visualizer grid styling */
+        .grid-container {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-top: 16px;
+        }
+
+        .matrix-wrapper {
+            text-align: center;
+        }
+
+        .matrix-title {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .grid {
+            display: grid;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            overflow: hidden;
+            background-color: rgba(0,0,0,0.1);
+        }
+
+        .cell {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 0.75rem;
+            font-family: var(--font-mono);
+            border: 1px solid var(--border-color);
+            transition: all 0.2s ease;
+        }
+
+        .cell.highlight {
+            background-color: rgba(99, 102, 241, 0.4);
+            border-color: #6366f1;
+            font-weight: 700;
+            transform: scale(1.05);
+        }
+
+        .cell.output-active {
+            background-color: rgba(168, 85, 247, 0.4);
+            border-color: #a855f7;
+            font-weight: 700;
+        }
+
+        /* Autograd Visualizer styling */
+        .autograd-flow {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .control-row {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-bottom: 12px;
+        }
+
+        .slider-group {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            flex: 1;
+            min-width: 120px;
+        }
+
+        .slider-group label {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        .slider-group input {
+            cursor: pointer;
+        }
+
+        .graph-svg {
+            width: 100%;
+            height: 180px;
+            background-color: rgba(0,0,0,0.1);
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+
+        .node-circle {
+            fill: var(--card-bg);
+            stroke: var(--accent-color);
+            stroke-width: 2;
+        }
+
+        .node-text {
+            fill: var(--text-primary);
+            font-size: 14px;
+            font-family: var(--font-mono);
+            text-anchor: middle;
+            dominant-baseline: middle;
+        }
+
+        .edge-line {
+            stroke: var(--text-secondary);
+            stroke-width: 2;
+            fill: none;
+        }
+
+        .edge-line.active {
+            stroke: #a855f7;
+            stroke-width: 3;
+            stroke-dasharray: 5;
+            animation: dash 1s linear infinite;
+        }
+
+        @keyframes dash {
+            to {
+                stroke-dashoffset: -10;
+            }
+        }
+
+        .flowing-particle {
+            fill: #a855f7;
+            r: 5;
+        }
+
+        /* Attention Visualizer styling */
+        .attention-words {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+
+        .word-tag {
+            padding: 6px 12px;
+            background-color: var(--border-color);
+            border-radius: 16px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.2s;
+        }
+
+        .word-tag.active {
+            background-color: var(--accent-color);
+            color: white;
+            font-weight: 600;
+        }
+
+        .attention-matrix {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 4px;
+            margin: 20px auto;
+            max-width: 300px;
+        }
+
+        .attention-cell {
+            aspect-ratio: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            font-size: 0.7rem;
+            font-family: var(--font-mono);
+            background-color: rgba(99, 102, 241, 0.05);
+            border-radius: 4px;
+            border: 1px solid var(--border-color);
+            transition: all 0.3s;
         }
 
         /* Responsive Design */
@@ -506,6 +730,11 @@
                     });
                 }
 
+                // 5. Initialize Interactive Visualizers
+                initAutogradVisualizer();
+                initCnnVisualizer();
+                initAttentionVisualizer();
+
             } catch (err) {
                 document.getElementById('markdown-content').innerHTML = `
                     <div style="color: #f43f5e; padding: 20px; border: 1px solid #f43f5e; border-radius: 8px; background-color: rgba(244, 63, 94, 0.1);">
@@ -523,7 +752,6 @@
             tocContainer.innerHTML = '';
 
             headings.forEach((heading, index) => {
-                // Generate a unique ID if not present
                 if (!heading.id) {
                     heading.id = `heading-${index}`;
                 }
@@ -531,18 +759,13 @@
                 const item = document.createElement('a');
                 item.href = `#${heading.id}`;
                 item.className = `toc-item toc-${heading.tagName.toLowerCase()}`;
-                
-                // Remove emojis or special Markdown syntax from TOC titles
                 item.textContent = heading.textContent.replace(/[📌💡⚠️📖]/g, '').trim();
                 
                 item.addEventListener('click', (e) => {
                     e.preventDefault();
                     heading.scrollIntoView({ behavior: 'smooth' });
-                    
-                    // Close sidebar on mobile
                     sidebar.classList.remove('open');
                     
-                    // Highlight active TOC
                     document.querySelectorAll('.toc-item').forEach(el => el.classList.remove('active'));
                     item.classList.add('active');
                     document.getElementById('current-chapter-title').textContent = item.textContent;
@@ -551,7 +774,6 @@
                 tocContainer.appendChild(item);
             });
 
-            // Set up intersection observer to highlight TOC as user scrolls
             const observerOptions = {
                 root: scrollContainer,
                 rootMargin: '0px 0px -60% 0px',
@@ -573,6 +795,435 @@
             }, observerOptions);
 
             headings.forEach(heading => observer.observe(heading));
+        }
+
+        // --- 1. Autograd Computational Graph Visualizer ---
+        function initAutogradVisualizer() {
+            const container = document.getElementById('autograd-visualizer');
+            if (!container) return;
+
+            container.innerHTML = `
+                <div class="visualizer-title">
+                    <span>1.3 計算圖與自動求導傳導動畫</span>
+                    <div>
+                        <button class="btn btn-outline" id="btn-forward">前向傳播 (Forward)</button>
+                        <button class="btn" id="btn-backward">反向傳播 (Backward)</button>
+                    </div>
+                </div>
+                <div class="autograd-flow">
+                    <div class="control-row">
+                        <div class="slider-group">
+                            <label>輸入 x = <span id="val-x">2</span></label>
+                            <input type="range" id="slide-x" min="1" max="10" value="2">
+                        </div>
+                        <div class="slider-group">
+                            <label>輸入 y = <span id="val-y">3</span></label>
+                            <input type="range" id="slide-y" min="1" max="10" value="3">
+                        </div>
+                        <div class="slider-group">
+                            <label>權重 w = <span id="val-w">4</span></label>
+                            <input type="range" id="slide-w" min="1" max="10" value="4">
+                        </div>
+                    </div>
+                    <svg class="graph-svg" id="autograd-svg">
+                        <!-- Connecting Edges -->
+                        <path d="M 60 40 L 150 70" class="edge-line" id="edge-xu"></path>
+                        <path d="M 60 110 L 150 70" class="edge-line" id="edge-yu"></path>
+                        <path d="M 190 70 L 320 90" class="edge-line" id="edge-uz"></path>
+                        <path d="M 60 160 L 320 90" class="edge-line" id="edge-wz"></path>
+
+                        <!-- Input Values -->
+                        <text x="30" y="40" fill="var(--text-primary)" text-anchor="middle" font-weight="700">x</text>
+                        <text x="30" y="110" fill="var(--text-primary)" text-anchor="middle" font-weight="700">y</text>
+                        <text x="30" y="160" fill="var(--text-primary)" text-anchor="middle" font-weight="700">w</text>
+
+                        <!-- Nodes -->
+                        <circle cx="170" cy="70" r="20" class="node-circle"></circle>
+                        <text x="170" y="70" class="node-text">+</text>
+                        
+                        <circle cx="340" cy="90" r="20" class="node-circle"></circle>
+                        <text x="340" y="90" class="node-text">×</text>
+
+                        <!-- intermediate Values -->
+                        <text x="170" y="38" id="text-u-val" fill="#6366f1" text-anchor="middle" font-size="12">u = ?</text>
+                        <text x="340" y="58" id="text-z-val" fill="#a855f7" text-anchor="middle" font-size="12">z = ?</text>
+
+                        <!-- Gradient flows -->
+                        <text x="110" y="45" id="grad-x" fill="#f43f5e" font-size="11" text-anchor="middle" display="none">dx=?</text>
+                        <text x="110" y="105" id="grad-y" fill="#f43f5e" font-size="11" text-anchor="middle" display="none">dy=?</text>
+                        <text x="250" y="65" id="grad-u" fill="#f43f5e" font-size="11" text-anchor="middle" display="none">du=?</text>
+                        <text x="250" y="150" id="grad-w" fill="#f43f5e" font-size="11" text-anchor="middle" display="none">dw=?</text>
+                        
+                        <!-- Glowing animated dot -->
+                        <circle id="glow-dot" r="6" fill="#f43f5e" style="display:none; filter: drop-shadow(0 0 4px #f43f5e);"></circle>
+                    </svg>
+                </div>
+            `;
+
+            // Elements
+            const slideX = document.getElementById('slide-x');
+            const slideY = document.getElementById('slide-y');
+            const slideW = document.getElementById('slide-w');
+            
+            const valX = document.getElementById('val-x');
+            const valY = document.getElementById('val-y');
+            const valW = document.getElementById('val-w');
+
+            const textU = document.getElementById('text-u-val');
+            const textZ = document.getElementById('text-z-val');
+
+            const gradX = document.getElementById('grad-x');
+            const gradY = document.getElementById('grad-y');
+            const gradU = document.getElementById('grad-u');
+            const gradW = document.getElementById('grad-w');
+            const glowDot = document.getElementById('glow-dot');
+
+            const btnForward = document.getElementById('btn-forward');
+            const btnBackward = document.getElementById('btn-backward');
+
+            const edgeXu = document.getElementById('edge-xu');
+            const edgeYu = document.getElementById('edge-yu');
+            const edgeUz = document.getElementById('edge-uz');
+            const edgeWz = document.getElementById('edge-wz');
+
+            function getInputs() {
+                return {
+                    x: parseInt(slideX.value),
+                    y: parseInt(slideY.value),
+                    w: parseInt(slideW.value)
+                };
+            }
+
+            // Update sliders live value
+            [slideX, slideY, slideW].forEach(slide => {
+                slide.addEventListener('input', () => {
+                    const vals = getInputs();
+                    valX.textContent = vals.x;
+                    valY.textContent = vals.y;
+                    valW.textContent = vals.w;
+                    resetVisualizer();
+                });
+            });
+
+            function resetVisualizer() {
+                textU.textContent = "u = ?";
+                textZ.textContent = "z = ?";
+                gradX.style.display = 'none';
+                gradY.style.display = 'none';
+                gradU.style.display = 'none';
+                gradW.style.display = 'none';
+                glowDot.style.display = 'none';
+                edgeXu.classList.remove('active');
+                edgeYu.classList.remove('active');
+                edgeUz.classList.remove('active');
+                edgeWz.classList.remove('active');
+            }
+
+            // Forward animation
+            btnForward.addEventListener('click', () => {
+                resetVisualizer();
+                const inputs = getInputs();
+                
+                // Activate forward edges
+                edgeXu.classList.add('active');
+                edgeYu.classList.add('active');
+                
+                setTimeout(() => {
+                    const u = inputs.x + inputs.y;
+                    textU.textContent = `u = ${u}`;
+                    edgeUz.classList.add('active');
+                    edgeWz.classList.add('active');
+                    
+                    setTimeout(() => {
+                        const z = u * inputs.w;
+                        textZ.textContent = `z = ${z}`;
+                    }, 800);
+                }, 800);
+            });
+
+            // Backward animation
+            btnBackward.addEventListener('click', async () => {
+                const inputs = getInputs();
+                const u = inputs.x + inputs.y;
+                const z = u * inputs.w;
+                
+                textU.textContent = `u = ${u}`;
+                textZ.textContent = `z = ${z}`;
+                
+                glowDot.style.display = 'block';
+                
+                // Gradient calculations
+                const dz_dz = 1;
+                const dz_du = inputs.w;
+                const dz_dw = u;
+                const dz_dx = dz_du * 1;
+                const dz_dy = dz_du * 1;
+
+                // Animate glowing particle flowing backwards
+                // Step 1: z to u & w
+                await animateDot(340, 90, 170, 70, 800);
+                gradU.textContent = `∂z/∂u = ${dz_du}`;
+                gradU.style.display = 'block';
+                
+                await animateDot(340, 90, 60, 160, 800);
+                gradW.textContent = `∂z/∂w = ${dz_dw}`;
+                gradW.style.display = 'block';
+
+                // Step 2: u to x & y
+                await animateDot(170, 70, 60, 40, 800);
+                gradX.textContent = `∂z/∂x = ${dz_dx}`;
+                gradX.style.display = 'block';
+
+                await animateDot(170, 70, 60, 110, 800);
+                gradY.textContent = `∂z/∂y = ${dz_dy}`;
+                gradY.style.display = 'block';
+                
+                glowDot.style.display = 'none';
+            });
+
+            function animateDot(x1, y1, x2, y2, duration) {
+                return new Promise(resolve => {
+                    const start = performance.now();
+                    function step(now) {
+                        const elapsed = now - start;
+                        const progress = Math.min(elapsed / duration, 1);
+                        // Linear interpolation
+                        const x = x1 + (x2 - x1) * progress;
+                        const y = y1 + (y2 - y1) * progress;
+                        glowDot.setAttribute('cx', x);
+                        glowDot.setAttribute('cy', y);
+                        
+                        if (progress < 1) {
+                            requestAnimationFrame(step);
+                        } else {
+                            resolve();
+                        }
+                    }
+                    requestAnimationFrame(step);
+                });
+            }
+        }
+
+        // --- 2. CNN 2D Sliding Convolution Visualizer ---
+        function initCnnVisualizer() {
+            const container = document.getElementById('cnn-visualizer');
+            if (!container) return;
+
+            container.innerHTML = `
+                <div class="visualizer-title">
+                    <span>5.3 2D 卷積特徵圖滑動視窗模擬</span>
+                    <button class="btn" id="btn-cnn-play">開始滑動 (Play)</button>
+                </div>
+                <div class="grid-container">
+                    <div class="matrix-wrapper">
+                        <div class="matrix-title">輸入 Image (5x5)</div>
+                        <div class="grid" id="cnn-input-grid" style="grid-template-columns: repeat(5, 32px);"></div>
+                    </div>
+                    <div style="font-size: 1.5rem; font-weight: 700;">*</div>
+                    <div class="matrix-wrapper">
+                        <div class="matrix-title">卷積核 Kernel (3x3)</div>
+                        <div class="grid" id="cnn-kernel-grid" style="grid-template-columns: repeat(3, 32px);"></div>
+                    </div>
+                    <div style="font-size: 1.5rem; font-weight: 700;">=</div>
+                    <div class="matrix-wrapper">
+                        <div class="matrix-title">輸出 Output (3x3)</div>
+                        <div class="grid" id="cnn-output-grid" style="grid-template-columns: repeat(3, 32px);"></div>
+                    </div>
+                </div>
+                <div style="margin-top: 16px; font-family: var(--font-mono); font-size: 0.85rem; text-align: center; color: var(--accent-color)" id="cnn-math-info">
+                    點擊播放鈕以觀察滑動卷積計算
+                </div>
+            `;
+
+            // Simple 5x5 Input, 3x3 Kernel, 3x3 Output
+            const inputData = [
+                [1, 1, 1, 0, 0],
+                [0, 1, 1, 1, 0],
+                [0, 0, 1, 1, 1],
+                [0, 0, 1, 1, 0],
+                [0, 1, 1, 0, 0]
+            ];
+            const kernelData = [
+                [1, 0, 1],
+                [0, 1, 0],
+                [1, 0, 1]
+            ];
+            const outputData = [
+                [4, 3, 4],
+                [2, 4, 3],
+                [2, 3, 4]
+            ];
+
+            const inputGrid = document.getElementById('cnn-input-grid');
+            const kernelGrid = document.getElementById('cnn-kernel-grid');
+            const outputGrid = document.getElementById('cnn-output-grid');
+            const btnPlay = document.getElementById('btn-cnn-play');
+            const mathInfo = document.getElementById('cnn-math-info');
+
+            // Draw Grids
+            for (let r = 0; r < 5; r++) {
+                for (let c = 0; c < 5; c++) {
+                    const el = document.createElement('div');
+                    el.className = 'cell';
+                    el.textContent = inputData[r][c];
+                    el.id = `in-${r}-${c}`;
+                    inputGrid.appendChild(el);
+                }
+            }
+
+            for (let r = 0; r < 3; r++) {
+                for (let c = 0; c < 3; c++) {
+                    const el = document.createElement('div');
+                    el.className = 'cell';
+                    el.style.backgroundColor = 'rgba(99, 102, 241, 0.15)';
+                    el.textContent = kernelData[r][c];
+                    kernelGrid.appendChild(el);
+                }
+            }
+
+            for (let r = 0; r < 3; r++) {
+                for (let c = 0; c < 3; c++) {
+                    const el = document.createElement('div');
+                    el.className = 'cell';
+                    el.textContent = '?';
+                    el.id = `out-${r}-${c}`;
+                    outputGrid.appendChild(el);
+                }
+            }
+
+            let playInterval = null;
+            let currentStep = 0;
+
+            btnPlay.addEventListener('click', () => {
+                if (playInterval) {
+                    clearInterval(playInterval);
+                    playInterval = null;
+                    btnPlay.textContent = "播放 (Play)";
+                    return;
+                }
+
+                btnPlay.textContent = "暫停 (Pause)";
+                playInterval = setInterval(() => {
+                    runCnnStep(currentStep);
+                    currentStep = (currentStep + 1) % 9;
+                }, 1200);
+            });
+
+            function runCnnStep(step) {
+                // Remove all highlights
+                document.querySelectorAll('#cnn-input-grid .cell').forEach(c => c.classList.remove('highlight'));
+                document.querySelectorAll('#cnn-output-grid .cell').forEach(c => c.classList.remove('output-active'));
+
+                // Calculate row/col of output
+                const outRow = Math.floor(step / 3);
+                const outCol = step % 3;
+
+                // Highlight output
+                const activeOutput = document.getElementById(`out-${outRow}-${outCol}`);
+                activeOutput.classList.add('output-active');
+                activeOutput.textContent = outputData[outRow][outCol];
+
+                // Highlight input region
+                let calculationText = "運算式: ";
+                let sum = 0;
+                for (let kr = 0; kr < 3; kr++) {
+                    for (let kc = 0; kc < 3; kc++) {
+                        const inRow = outRow + kr;
+                        const inCol = outCol + kc;
+                        const inputCell = document.getElementById(`in-${inRow}-${inCol}`);
+                        inputCell.classList.add('highlight');
+                        
+                        const mul = inputData[inRow][inCol] * kernelData[kr][kc];
+                        sum += mul;
+                        
+                        if (kernelData[kr][kc] !== 0) {
+                            calculationText += `(${inputData[inRow][inCol]}×${kernelData[kr][kc]}) + `;
+                        }
+                    }
+                }
+                
+                mathInfo.textContent = calculationText.slice(0, -3) + ` = ${sum}`;
+            }
+        }
+
+        // --- 3. Attention Weight Matrix Visualizer ---
+        function initAttentionVisualizer() {
+            const container = document.getElementById('attention-visualizer');
+            if (!container) return;
+
+            const seq = ["I", "love", "AI", "models", "."];
+            // Fake attention weights matrix (sum of rows equal 1.0)
+            const weights = [
+                [0.60, 0.10, 0.15, 0.10, 0.05], // "I" attends to...
+                [0.10, 0.70, 0.10, 0.05, 0.05], // "love" attends to...
+                [0.05, 0.10, 0.75, 0.08, 0.02], // "AI" attends to...
+                [0.08, 0.05, 0.20, 0.62, 0.05], // "models" attends to...
+                [0.10, 0.10, 0.10, 0.10, 0.60]  // "." attends to...
+            ];
+
+            container.innerHTML = `
+                <div class="visualizer-title">
+                    <span>6.3 自注意力權重矩陣交互分佈視覺化</span>
+                </div>
+                <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 12px;">滑鼠懸停於單字上，以觀察自注意力機制如何為各 Token 動態分配注意力權重：</p>
+                <div class="attention-words" id="attn-words-container"></div>
+                <div class="attention-matrix" id="attn-matrix-grid"></div>
+                <div style="font-family: var(--font-mono); font-size: 0.85rem; text-align: center; color: #a855f7" id="attn-info">
+                    把滑鼠移到上方單字看看！
+                </div>
+            `;
+
+            const wordsContainer = document.getElementById('attn-words-container');
+            const matrixGrid = document.getElementById('attn-matrix-grid');
+            const attnInfo = document.getElementById('attn-info');
+
+            // Draw word tags
+            seq.forEach((word, idx) => {
+                const tag = document.createElement('div');
+                tag.className = 'word-tag';
+                tag.textContent = word;
+                tag.dataset.idx = idx;
+                wordsContainer.appendChild(tag);
+
+                tag.addEventListener('mouseenter', () => {
+                    highlightAttentionRow(idx);
+                });
+            });
+
+            // Draw matrix cells
+            for (let r = 0; r < 5; r++) {
+                for (let c = 0; c < 5; c++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'attention-cell';
+                    cell.id = `cell-${r}-${c}`;
+                    cell.innerHTML = `<span style="font-size:8px; color:var(--text-secondary)">${seq[r]}→${seq[c]}</span><b style="font-size:10px">${weights[r][c].toFixed(2)}</b>`;
+                    matrixGrid.appendChild(cell);
+                }
+            }
+
+            function highlightAttentionRow(queryIdx) {
+                // Reset all
+                document.querySelectorAll('.word-tag').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.attention-cell').forEach(c => {
+                    c.style.backgroundColor = 'rgba(99, 102, 241, 0.05)';
+                    c.style.borderColor = 'var(--border-color)';
+                });
+
+                // Highlight active Query word
+                wordsContainer.children[queryIdx].classList.add('active');
+
+                // Highlight cells in that row based on weight density
+                let textResult = `單字 "${seq[queryIdx]}" 對序列的注意力權重分佈: <br>`;
+                for (let c = 0; c < 5; c++) {
+                    const w = weights[queryIdx][c];
+                    const cell = document.getElementById(`cell-${queryIdx}-${c}`);
+                    cell.style.backgroundColor = `rgba(99, 102, 241, ${w * 0.8})`;
+                    cell.style.borderColor = '#6366f1';
+                    textResult += `<b>${seq[c]}</b>: ${(w * 100).toFixed(0)}% | `;
+                }
+                
+                attnInfo.innerHTML = textResult.slice(0, -3);
+            }
         }
 
         // Initialize Page

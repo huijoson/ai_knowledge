@@ -1,4 +1,4 @@
-# 從零開始：手寫實作深度學習與大語言模型核心架構 (終極學習與實作指南)
+# 從零開始：自手實作深度學習與大語言模型核心架構 (終極學習與實作指南)
 
 歡迎閱讀這本書！本書專為希望藉由「從零開始手寫實作（From Scratch）」來真正吃透現代深度學習與大語言模型（LLM）底層機制的研究者與工程師所寫。
 
@@ -16,7 +16,7 @@
 *   [第六章：注意力機制 (Attention) — 從 MHA 到大模型的 GQA 與 MQA](#第六章注意力機制-attention--從-mha-到大模型的-gqa-與-mqa)
 *   [第七章：現代大語言模型核心組件 — RMSNorm, SwiGLU 與 RoPE](#第七章現代大語言模型核心組件--rmsnorm-swiglu-與-rope)
 *   [第八章：LLM 推理效能優化 (KV Cache) — 推理加速的神奇魔法](#第八章llm-推理效能優化-kv-cache--推理加速的神奇魔法)
-*   [附錄：測試驅動開發 (TDD) 與驗證指南](#附錄測試驱动開發-tdd-與驗證指南)
+*   [附錄：測試驅動開發 (TDD) 與驗證指南](#附錄測試驅動開發-tdd-與驗證指南)
 
 ---
 
@@ -65,6 +65,13 @@ dz/dy = 4 ◄──┘
 
 > [!NOTE]
 > 在動態計算圖（如 PyTorch 的 Autograd）中，當前向傳播執行時，系統會自動在記憶體中建立一個計算圖。每個張量（Tensor）都會保存指向建立它的算子節點的指標（`grad_fn`）。當呼叫 `loss.backward()` 時，引擎就會沿著這些指標逆向遍歷計算圖，自動套用鏈式法則算出所有梯度。
+
+---
+
+### 1.3 互動式自動求導與計算圖視覺化工具
+您可以調整下方滑動條改變輸入與權重，並點選「前向傳播」與「反向傳播」觀察數據與梯度的傳遞路徑與粒子流向動畫。
+
+<div id="autograd-visualizer" class="interactive-visualizer"></div>
 
 ---
 
@@ -244,6 +251,13 @@ $$Y_{b, c, i, j} = \max_{m, n} X_{b, c, i \cdot S + m, j \cdot S + n}$$
 
 ---
 
+### 5.3 互動式 2D 卷積滑動核視覺化工具
+點擊下方的播放按鈕，觀察卷積核如何在 5x5 的圖像上滑動，計算出 3x3 的特徵圖結果。
+
+<div id="cnn-visualizer" class="interactive-visualizer"></div>
+
+---
+
 ## 第六章：注意力機制 (Attention) — 從 MHA 到大模型的 GQA 與 MQA
 
 注意力機制擺脫了卷積和循環在長距離關聯上的物理限制，讓模型能「一步到位」地存取全局資訊。
@@ -253,7 +267,7 @@ $$Y_{b, c, i, j} = \max_{m, n} X_{b, c, i \cdot S + m, j \cdot S + n}$$
 
 1.  **投影生成 $Q, K, V$**：
     $$Q = X W_Q, \quad K = X W_K, \quad V = X W_V$$
-    其中 $W_Q, W_K, W_V \in \mathbb{R}^{d_{model} \times d_{model}}$。
+    where $W_Q, W_K, W_V \in \mathbb{R}^{d_{model} \times d_{model}}$。
 2.  **計算相似度（點積注意力）**：
     $$A = \text{softmax}\left(\frac{Q K^T}{\sqrt{d_k}} + M\right)$$
     *   $QK^T$ 的每個元素代表第 $i$ 個 Token 和第 $j$ 個 Token 之間的相關度。
@@ -276,7 +290,7 @@ $$Y_{b, c, i, j} = \max_{m, n} X_{b, c, i \cdot S + m, j \cdot S + n}$$
     *   *KV 快取佔用*：小（降低至原本的 $1 / H_{heads}$）。
     *   *缺點*：模型表達能力顯著退化，難以收斂。
 3.  **Grouped-Query Attention (GQA)**：
-    Query 頭被分為數個組，每組共享一個 Key 頭和 Value 頭。
+    Query 頭被分為數個組，每組共享一個 Key 頭 and Value 頭。
     *   *優點*：完美融合了 MHA 的高品質與 MQA 的超低記憶體佔用。**LLaMA 3、Mistral 等現代 LLM 皆全面採用 GQA。**
 
 ```
@@ -287,6 +301,13 @@ Q1 Q2 Q3 Q4                    Q1 Q2 Q3 Q4                 Q1 Q2 Q3 Q4
 K1 K2 K3 K4                      K1     K2                      K1
 V1 V2 V3 V4                      V1     V2                      V1
 ```
+
+---
+
+### 6.3 互動式自注意力矩陣權重視覺化工具
+將滑鼠懸停在不同的單字（Query）上，觀察自注意力機制如何為各個 Token 分配不同的權重強度（以顏色深淺表示）。
+
+<div id="attention-visualizer" class="interactive-visualizer"></div>
 
 ---
 
