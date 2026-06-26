@@ -1,250 +1,209 @@
-# 從零開始：深入理解深度學習與大語言模型核心架構 (手把手實作指南)
+# 從零開始：自手實作深度學習與大語言模型核心架構 (手把手學習與實作指南)
 
-歡迎閱讀這本書！本書專為希望透過「動手實作（From Scratch）」來真正理解現代人工智慧核心模型（RNN, CNN, Self-Attention, Transformer, LLM）的開發者與研究者所設計。
+歡迎閱讀這本書！本書專為希望藉由「從零開始手寫實作（From Scratch）」來真正吃透現代深度學習與大語言模型（LLM）底層機制的研究者與工程師所寫。
 
-在本書中，我們不只是學習理論，而是會結合 **OpenSpec (規格驅動)** 與 **Superpowers (測試驅動)** 的工程思維，將每個數學公式與結構設計轉化為實際運行的 Python & PyTorch 程式碼。
-
----
-
-## 📖 目錄
-1. [第一章：循環神經網路 (RNN & LSTM) — 時間與序列的建模](#第一章循環神經網路-rnn--lstm--時間與序列的建模)
-2. [第二章：機器視覺的基石 (CNN) — 空間與特徵的提取](#第二章機器視覺的基石-cnn--空間與特徵的提取)
-3. [第三章：注意力機制 (Attention) — 從 MHA 到大模型的 GQA 與 MQA](#第三章注意力機制-attention--從-mha-到大模型的-gqa-與-mqa)
-4. [第四章：現代大語言模型 (LLM) 的穩定與加速技術 — RMSNorm, SwiGLU 與 RoPE](#第四章現代大語言模型-llm-的穩定與加速技術--rmsnorm-swiglu-與-rope)
-5. [第五章：經典 Transformer 與 Decoder-Only LLM 的組裝](#第五章經典-transformer-與-decoder-only-llm-的組裝)
-6. [附錄：如何使用本專案進行自我驗證 (測試驅動學習)](#附錄如何使用本專案進行自我驗證-測試驅動學習)
+我們拒絕僅停留在理論公式，也拒絕直接呼叫高階套件。我們將結合 **OpenSpec（規格驅動）** 與 **Superpowers（測試驅動）** 的軟體工程邏輯，把數學原理一步步轉化為能跑、可過單元測試的 PyTorch 程式碼。
 
 ---
 
-## 第一章：循環神經網路 (RNN & LSTM) — 時間與序列的建模
+## 📖 本書大綱
 
-在處理自然語言、時間序列或語音等資料時，資料點之間存在強烈的**時間前後順序關係**。傳統的密集連接網路（Dense Layer）假設輸入之間是獨立的，無法有效處理這類序列資料。這就引入了**循環神經網路（Recurrent Neural Networks, RNN）**。
-
-### 1.1 傳統 RNN Cell 的數學與物理意義
-
-RNN 的核心思想是維護一個**隱藏狀態（Hidden State, $h_t$）**，這個狀態就像是網路的「短期記憶」，會在時間軸上不斷傳遞。
-
-#### 數學公式
-對於每一個時間步 $t$，網路接收當前輸入 $x_t$ 以及上一個時間步的隱藏狀態 $h_{t-1}$，並計算出新的隱藏狀態 $h_t$：
-
-$$h_t = \tanh(x_t W_{ih}^T + b_{ih} + h_{t-1} W_{hh}^T + b_{hh})$$
-
-*   $x_t \in \mathbb{R}^{B \times D_{in}}$：當前步輸入（$B$ 是 Batch Size，$D_{in}$ 是輸入特徵維度）。
-*   $h_{t-1} \in \mathbb{R}^{B \times D_{hid}}$：前一步的隱藏記憶。
-*   $W_{ih} \in \mathbb{R}^{D_{hid} \times D_{in}}$：輸入到隱藏層的權重矩陣。
-*   $W_{hh} \in \mathbb{R}^{D_{hid} \times D_{hid}}$：隱藏層到隱藏層的循環權重矩陣。
-*   $\tanh$：激活函數，將輸出限制在 $[-1, 1]$ 之間，防止數值無限發散。
-
-#### 為什麼傳統 RNN 會遺忘？(梯度消失與爆炸)
-當我們對 RNN 進行時間反向傳播（BPTT）時，梯度需要穿過多個時間步：
-$$\frac{\partial h_T}{\partial h_0} = \prod_{t=1}^T \frac{\partial h_t}{\partial h_{t-1}}$$
-其中 $\frac{\partial h_t}{\partial h_{t-1}} = \text{diag}(1 - h_t^2) W_{hh}$。
-*   如果 $W_{hh}$ 的特徵值小於 1，隨著時間步 $T$ 變長，梯度會呈指數級衰減至 0（**梯度消失**），導致網路無法記得很久以前的資訊。
-*   反之，若特徵值大於 1，梯度會呈指數級增長（**梯度爆炸**）。
+*   [第一章：自動求導 (Autograd) 與計算圖 — 深度學習的物理心臟](#第一章自動求導-autograd-與計算圖--深度學習的物理心臟)
+*   [第二章：基礎層與激活函數 (GELU) — 讓網路具備非線性表達能力](#第二章基礎層與激活函數-gelu--讓網路具備非線性表達能力)
+*   [第三章：優化器的藝術 (AdamW) — 訓練大語言模型的黃金鑰匙](#第三章優化器的藝術-adamw--訓練大語言模型的黃金鑰匙)
+*   [第四章：循環神經網路 (RNN & LSTM) — 時間與序列的建模](#第四章循環神經網路-rnn--lstm--時間與序列的建模)
+*   [第五章：卷積神經網路 (CNN) — 空間特徵提取與下採樣](#第五章卷積神經網路-cnn--空間特徵提取與下採樣)
+*   [第六章：注意力機制 (Attention) — 從 MHA 到大模型的 GQA 與 MQA](#第六章注意力機制-attention--從-mha-到大模型的-gqa-與-mqa)
+*   [第七章：現代大語言模型核心組件 — RMSNorm, SwiGLU 與 RoPE](#第七章現代大語言模型核心組件--rmsnorm-swiglu-與-rope)
+*   [第八章：LLM 推理效能優化 (KV Cache) — 推理加速的神奇魔法](#第八章llm-推理效能優化-kv-cache--推理加速的神奇魔法)
+*   [附錄：測試驅動開發 (TDD) 與驗證指南](#附錄測試驅動開發-tdd-與驗證指南)
 
 ---
 
-### 1.2 LSTM：引入門控（Gates）機制
+## 第一章：自動求導 (Autograd) 與計算圖 — 深度學習的物理心臟
 
-為了為了解決傳統 RNN 的短期記憶限制，**長短期記憶網路（Long Short-Term Memory, LSTM）** 於 1997 年被提出。它引入了**細胞狀態（Cell State, $C_t$）**，這是一條極具革命性的資訊高速公路，梯度可以在上面幾乎無損地傳播。
+要理解深度學習，首先要理解「機器是如何學習的」。其本質是：**前向傳播計算誤差 $\rightarrow$ 計算誤差對參數的偏微分（梯度） $\rightarrow$ 沿著梯度反方向微調參數。**
 
-LSTM 的關鍵在於**門（Gates）**，門就像是閥門，由一個 Sigmoid 神經網路層和一個按元素相乘（Hadamard Product）的操作組成，用來決定有多少資訊可以通過。
+### 1.1 什麼是計算圖（Computational Graph）？
+計算圖是一種將複雜的數學運算表示為「節點（Node）」與「有向邊（Edge）」的圖形。
+*   **節點**：代表運算（如加、乘、$\sin$、$\exp$）或變數（參數、輸入）。
+*   **有向邊**：代表資料的流動方向。
 
+例如，計算 $z = (x + y) \times w$ 的計算圖如下：
 ```
-                    Cell State (C_t)
-   C_{t-1} ───────────────────⊕─────────────────── C_t
-                             ▲
-                             │ (i_t * g_t)
-              ┌───┐        ┌─┴─┐        ┌───┐
-   h_{t-1} ──►│ f ├──────► │ i ├──────► │ o ├───► h_t
-              └───┘        └───┘        └───┘
-              Forget       Input        Output
-              Gate         Gate         Gate
+  x ──┐
+      ├──► [ + ] (u) ──┐
+  y ──┘                ├──► [ × ] (z)
+                  w ───┘
 ```
+在**前向傳播**時，我們從左向右計算數值。在**反向傳播**時，我們從右向左，利用**微積分的鏈式法則（Chain Rule）**，動態地將上游梯度乘以當前節點的局部偏微分，流向下游。
 
-#### LSTM 的六個核心公式
-對於當前輸入 $x_t$ 和前一步隱藏狀態 $h_{t-1}$：
+### 1.2 鏈式法則（Chain Rule）
+假設 $z$ 是 $u$ 的函數，而 $u$ 是 $x$ 的函數，則 $z$ 對 $x$ 的偏微分為：
+$$\frac{\partial z}{\partial x} = \frac{\partial z}{\partial u} \times \frac{\partial u}{\partial x}$$
 
-1.  **遺忘門 ($f_t$)**：決定要丟棄多少舊記憶。
-    $$f_t = \sigma(x_t W_{if}^T + b_{if} + h_{t-1} W_{hf}^T + b_{hf})$$
-2.  **輸入門 ($i_t$)**：決定要更新哪些新資訊。
-    $$i_t = \sigma(x_t W_{ii}^T + b_{ii} + h_{t-1} W_{hi}^T + b_{hi})$$
-3.  **候選細胞狀態 ($\tilde{C}_t$)**：準備寫入細胞狀態的新候選值。
-    $$\tilde{C}_t = \tanh(x_t W_{ig}^T + b_{ig} + h_{t-1} W_{hg}^T + b_{hg})$$
-4.  **細胞狀態更新 ($C_t$)**：舊記憶乘以遺忘門，加上新記憶乘以輸入門。
-    $$C_t = f_t \odot C_{t-1} + i_t \odot \tilde{C}_t$$
-5.  **輸出門 ($o_t$)**：決定下一個隱藏狀態 $h_t$ 應該輸出哪些部分。
-    $$o_t = \sigma(x_t W_{io}^T + b_{io} + h_{t-1} W_{ho}^T + b_{ho})$$
-6.  **隱藏狀態輸出 ($h_t$)**：將更新後的細胞狀態通過 $\tanh$，再與輸出門相乘。
-    $$h_t = o_t \odot \tanh(C_t)$$
+在自動求導（Autograd）引擎中，每個節點只需專注於計算自己的**局部導數（Local Gradient）**：
+1.  節點收到來自上游（右邊）傳回的梯度 $\frac{\partial \text{Loss}}{\partial \text{Output}}$。
+2.  節點計算當前運算對輸入的局部偏微分 $\frac{\partial \text{Output}}{\partial \text{Input}}$。
+3.  兩者相乘，將梯度傳遞給下游（左邊）：
+    $$\frac{\partial \text{Loss}}{\partial \text{Input}} = \frac{\partial \text{Loss}}{\partial \text{Output}} \times \frac{\partial \text{Output}}{\partial \text{Input}}$$
 
 > [!NOTE]
-> 由於 $f_t$ 的值域在 $[0, 1]$ 之間。當 $f_t \approx 1$ 時，舊的細胞狀態 $C_{t-1}$ 的梯度便能無損地流向 $C_t$，這徹底解決了長序列訓練中梯度消失的問題。
+> 自動求導的精妙之處在於，不論網路多複雜，我們只需要定義好每個原子級別運算（加、減、乘、矩陣乘法等）的 forward 和 backward 規則，電腦就能以萬用的邏輯精準算出任何變數的梯度！
 
 ---
 
-## 第二章：機器視覺的基石 (CNN) — 空間與特徵的提取
+## 第二章：基礎層與激活函數 (GELU) — 讓網路具備非線性表達能力
 
-與序列資料不同，圖像資料具有強烈的**空間局部相關性**（例如：相鄰的像素通常代表同一個物體的一部分）。如果用全連接層來處理圖像，參數數量會隨圖像解析度呈二次方爆炸增長，且容易失去空間相對位置。這時就需要**卷積神經網路（Convolutional Neural Networks, CNN）**。
-
-### 2.1 卷積（Convolution）與互相關（Cross-Correlation）
-
-在深度學習中，我們通常說的「卷積層」在數學上實際上是**互相關運算**。它的核心特點是**局部連接（Local Connectivity）**與**權重共享（Parameter Sharing）**。
-
-#### 2D 卷積計算過程
-我們拿一個大小為 $(K_h, K_w)$ 的**卷積核（Kernel）**在圖像上滑動，每到一個位置，就將卷積核與圖像重疊區域的數值進行**按元素相乘並求和**，最後加上偏置（Bias）：
-
-$$Y_{b, c_{out}, i, j} = b_{c_{out}} + \sum_{c_{in}=0}^{C_{in}-1} \sum_{m=0}^{K_h-1} \sum_{n=0}^{K_w-1} X_{b, c_{in}, i \cdot S + m, j \cdot S + n} \cdot W_{c_{out}, c_{in}, m, n}$$
-
-```
-Input Image (5x5)            Kernel (3x3)             Output (3x3)
-┌───┬───┬───┬───┬───┐                                 ┌───┬───┬───┐
-│ 1 │ 1 │ 1 │ 0 │ 0 │        ┌───┬───┬───┐            │ 4 │ 3 │ 4 │
-├───┼───┼───┼───┼───┤        │ 1 │ 0 │ 1 │            ├───┼───┼───┤
-│ 0 │ 1 │ 1 │ 1 │ 0 │   *    ├───┼───┼───┤     =      │ 2 │ 4 │ 3 │
-├───┼───┼───┼───┼───┤        │ 0 │ 1 │ 0 │            ├───┼───┼───┤
-│ 0 │ 0 │ 1 │ 1 │ 1 │        ├───┼───┼───┤            │ 2 │ 3 │ 4 │
-├───┼───┼───┼───┼───┤        │ 2 │ 1 │ 0 │            └───┴───┴───┘
-│ 0 │ 0 │ 1 │ 1 │ 0 │        └───┴───┴───┘
-└───┴───┴───┴───┴───┘
-```
-
-#### 重要超參數
-*   **Stride (步長, $S$)**：卷積核每次滑動的像素格子數。步長越大，輸出特徵圖的解析度越低。
-*   **Padding (填充, $P$)**：在圖像邊緣填充 0 的圈數。主要是為了解決圖像邊緣資訊提取不足，以及控制輸出特徵圖的維度。
-
-#### 輸出解析度計算公式
-$$H_{out} = \left\lfloor \frac{H_{in} - K_h + 2P_h}{S_h} \right\rfloor + 1$$
+### 2.1 全連接層 (Linear Layer)
+全連接層是深度學習中最普遍的投影層：
+$$Y = X W^T + b$$
+*   **前向傳播**：進行矩陣乘法，將低維特徵投影至高維，或將高維特徵壓縮。
+*   **反向傳播梯度傳遞**：
+    *   $\frac{\partial L}{\partial X} = \frac{\partial L}{\partial Y} W$
+    *   $\frac{\partial L}{\partial W} = \left(\frac{\partial L}{\partial Y}\right)^T X$
+    *   $\frac{\partial L}{\partial b} = \sum_{\text{batch}} \frac{\partial L}{\partial Y}$
 
 ---
 
-## 第三章：注意力機制 (Attention) — 從 MHA 到大模型的 GQA 與 MQA
+### 2.2 為什麼需要激活函數？
+如果沒有激活函數，不論我們疊加多少層線性層，多個矩陣相乘的結果依然只是一個單一的線性變換（$Y = X W_1 W_2 = X W_{net}$），這使得模型完全無法擬合複雜的非線性關係（例如 XOR 問題或影像分類）。
 
-不論是 RNN 還是 CNN，它們提取資訊的感受野都是受限的。**注意力機制（Attention Mechanism）** 改變了這一切。它允許網路在一步之內，動態地將焦點對準序列中的任何一個位置，實現全域（Global）上下文關聯。
+#### 1. ReLU (Rectified Linear Unit)
+$$\text{ReLU}(x) = \max(0, x)$$
+*   **特點**：計算極快，在正區間梯度為 1，有效緩解梯度消失；但若輸入一直小於 0，該神經元會永久壞死（Dying ReLU）。
 
-### 3.1 核心概念：Query, Key, Value
-注意力機制可以類比為**資料庫查詢**：
-*   **Query ($Q$)**：當前正在查詢的資訊。
-*   **Key ($K$)**：各個位置所擁有的特徵標籤。
-*   **Value ($V$)**：各個位置實際包含的內容資訊。
+#### 2. GELU (Gaussian Error Linear Unit)
+**現代 LLM（GPT-4、BERT）的標配激活函數**。
+*   **物理直覺**：與 ReLU 直截了當地在 0 點切斷不同，GELU 根據輸入值的大小，以概率決定是否保留該特徵。它結合了機率密度函數（高斯分佈），使非線性邊界更平滑。
+*   由於正態分佈的累積分布函數計算複雜，硬體上常用以下公式近似實作：
+    $$\text{GELU}(x) \approx 0.5x \left(1 + \tanh\left(\sqrt{\frac{2}{\pi}} \left(x + 0.044715 x^3\right)\right)\right)$$
 
-數學公式為：
+---
+
+## 第三章：優化器的藝術 (AdamW) — 訓練大語言模型的黃金鑰匙
+
+計算出梯度後，我們需要更新參數。**優化器**決定了參數更新的步幅與方向。
+
+### 3.1 隨機梯度下降 (SGD)
+$$\theta_{t+1} = \theta_t - \eta \cdot g_t$$
+*   **問題**：若所有參數都使用相同的學習率 $\eta$，在陡峭的方向容易震盪，在平緩的方向前進極慢。
+
+### 3.2 AdamW 的三大支柱 (Decoupled Weight Decay)
+為了加速收斂，Adam 結合了 **一階動量（Momentum，記憶過去的方向）** 與 **二階動量（自適應學習率，為頻繁更新的參數降低步長，為稀疏更新的參數增大步長）**。
+
+而在大模型時代，我們通常需要使用 **L2 正則化（Weight Decay）** 防止過擬合。傳統的 Adam 會將 L2 正則化的梯度直接放入二階矩中計算，這會使得常更新的權重衰減變慢，不常更新的權重衰減變快。
+**AdamW（Adam with Decoupled Weight Decay）** 修正了這一點，將權重衰減直接作用在參數更新的最後一步，與梯度的矩估計完全解耦：
+
+```
+1. 計算梯度 g_t ──────► 2. 更新一階與二階矩 (m_t, v_t) ──► 3. 計算偏差修正
+                                                                    │
+   ┌────────────────────────────────────────────────────────────────┘
+   ▼
+4. 更新參數: θ_{t+1} = θ_t - η * (λ * θ_t) - [ η / (sqrt(v_t) + ε) ] * m_t
+                                  └── Decoupled Weight Decay ──┘
+```
+
+> [!IMPORTANT]
+> 幾乎所有現代大型 Transformer 網路（LLaMA, GPT 系列）的訓練，都是使用 **AdamW** 作為優化器。它是大模型得以穩定收斂的底層支柱。
+
+---
+
+## 第四章：循環神經網路 (RNN & LSTM) — 時間與序列的建模
+
+在自然語言等時間序列中，前後資料有強烈關聯，需要「短期記憶」。
+
+### 4.1 傳統 RNN
+$$h_t = \tanh(x_t W_{ih}^T + b_{ih} + h_{t-1} W_{hh}^T + b_{hh})$$
+*   由於反向傳播在時間軸上連乘（BPTT），容易導致梯度呈指數級衰減（**梯度消失**）或爆炸，使模型無法記住 10 個時間步之前的資訊。
+
+### 4.2 LSTM (長短期記憶)
+引入**細胞狀態 ($C_t$)** 作為高速公路，並由三個門（Gates）來調控：
+1.  **遺忘門 ($f_t$)**：決定丟棄多少舊記憶。
+2.  **輸入門 ($i_t$)**：決定寫入多少新資訊。
+3.  **輸出門 ($o_t$)**：決定隱藏狀態 $h_t$ 輸出什麼。
+
+這使得梯度可以在細胞狀態通道上暢通無阻，大幅延長了記憶距離。
+
+---
+
+## 第五章：卷積神經網路 (CNN) — 空間特徵提取與下採樣
+
+對於影像，像素的「鄰近關係」極度重要。
+
+### 5.1 局部連接與權重共享
+*   **局部連接**：卷積核每次只處理一小塊局部區域（感受野），保留空間結構。
+*   **權重共享**：一個卷積核在整張影像上滑動，使用同一組參數。這不僅大幅減少參數，更讓模型具備「平移不變性」（無論貓在影像的左上角還是右下角，都能被同一個卷積核偵測到）。
+
+---
+
+## 第六章：注意力機制 (Attention) — 從 MHA 到大模型的 GQA 與 MQA
+
+Transformer 完全捨棄了卷積與循環，僅依賴「注意力」來抓取上下文。
+
+### 6.1 核心機制
+將輸入向量投影為 Queries ($Q$), Keys ($K$), Values ($V$)。計算 Query 與所有 Key 的相似度（點積），經過 Softmax 歸一化後加權 Value：
 $$\text{Attention}(Q, K, V) = \text{softmax}\left(\frac{Q K^T}{\sqrt{d_k}} + M\right) V$$
-其中 $\sqrt{d_k}$ 是縮放因子，用以防止點積值過大導致 Softmax 飽和而發生梯度消失；$M$ 是遮罩（Mask）。
+
+*   **Causal Mask**：在解碼生成時，將未來位置的注意力權重設為 $-\infty$（使 Softmax 計算後為 0），防止模型偷看未來的答案。
+
+### 6.2 大模型的推理優化：GQA 與 MQA
+當大模型生成文本時，每個 Token 都要跟前面所有 Token 的 Key 和 Value 計算注意力。為了加速，我們會在記憶體中快取前面的 Key/Value，即 **KV Cache**。
+*   **MHA**：每個 Query 頭有自己獨立的 KV 頭，KV Cache 佔用極大記憶體帶寬。
+*   **MQA**：所有 Query 頭共享一個 KV 頭，節省帶寬但精度降低。
+*   **GQA**：Query 分組共享 KV 頭，兼顧效率與準確度，是當前 LLaMA 3 等大模型的標配。
 
 ---
 
-### 3.2 現代大模型（LLM）的注意力進化
+## 第七章：現代大語言模型核心組件 — RMSNorm, SwiGLU 與 RoPE
 
-為了提升大語言模型在推理階段（Generation/Inference）的效率，注意力機制經歷了三次重要演進：
+為了將 Transformer 擴展到千億參數，科學家對其進行了數次架構上的升級：
 
-#### 1. Multi-Head Attention (MHA - 多頭注意力)
-*   **做法**：Query、Key、Value 都各自擁有 $H$ 個獨立的注意力頭。
-*   **缺點**：推理時需要快取每一個 Token 的 Key 和 Value (即 **KV Cache**)，這會消耗極大的記憶體帶寬。
+### 7.1 RMSNorm (均方根歸一化)
+*   去除 LayerNorm 的均值減法，僅利用均方根進行尺度縮放，計算效率更高且訓練同樣穩定。
 
-#### 2. Multi-Query Attention (MQA - 多查詢注意力)
-*   **做法**：所有的 Query 頭共享**同一個** Key 頭和 Value 頭。
-*   **優缺點**：極大地降低了 KV Cache 的記憶體佔用，但因為多個頭只能共享一組 Key/Value 資訊，模型表達能力有所下降。
+### 7.2 SwiGLU FFN
+*   利用 Swish 激活函數的門控線性單元（SwiGLU），替代傳統前饋網路中的 ReLU 激活，帶來更平滑的梯度流與更強的擬合能力。
 
-#### 3. Grouped-Query Attention (GQA - 分組查詢注意力)
-*   **做法**：將 Query 頭分組（例如每 4 個或 8 個一組），每一組共享一組 Key 頭和 Value 頭。
-*   **結論**：這是 LLaMA 3 與 Mistral 等現代開源大模型的標配，完美平衡了計算精度與記憶體儲存效率。
+### 7.3 RoPE 旋轉位置編碼
+*   直接在複數空間上對 Query 與 Key 進行向量旋轉，使點積運算直接包含「相對位置」資訊。這給予了現代 LLM 極為強大的**上下文長度外推能力**。
+
+---
+
+## 第八章：LLM 推理效能優化 (KV Cache) — 推理加速的神奇魔法
+
+當我們呼叫 ChatGPT 時，字是一個個噴出來的（自迴歸生成）。
+當預測下一個 Token 時：
+$$x_{new} = f(\text{prompt} + \text{generated\_tokens})$$
+如果我們每次生成新字，都要重新計算 Prompt 裡所有字的注意力，計算複雜度會隨著長度呈二次方 $O(L^2)$ 增長。
+
+**KV Cache** 的思想是：**過去計算過的 Key 和 Value 是不會變的，只有當前新生成的 Token 的 $K_t, V_t$ 需要被計算。**
+因此，我們將歷史的 $K$ 和 $V$ 儲存起來，每次只需計算當前 Token 的 $Q_t, K_t, V_t$，並將 $K_t, V_t$ 拼接（Concat）到快取中。
+這直接將單步解碼的時間複雜度從 $O(L^2)$ 降到了 $O(L)$。
 
 ```
-Multi-Head Attention (MHA)    Grouped-Query (GQA)         Multi-Query (MQA)
-    Q1 Q2 Q3 Q4                   Q1 Q2 Q3 Q4                 Q1 Q2 Q3 Q4
-    │  │  │  │                    └─┬─┘  └─┬─┘                └───┬───┘
-    ▼  ▼  ▼  ▼                      ▼      ▼                      ▼
-    K1 K2 K3 K4                     K1     K2                     K1
-    V1 V2 V3 V4                     V1     V2                     V1
+Step 1: 輸入 "I love"  ──► 計算其 K_0, V_0 ──► 儲存到 KV Cache
+Step 2: 生成 "AI"      ──► 只計算 "AI" 的 K_1, V_1 ──► 與 Cache 拼接 ──► 預測下一個字
 ```
 
 ---
 
-## 第四章：現代大語言模型 (LLM) 的穩定與加速技術 — RMSNorm, SwiGLU 與 RoPE
+## 附錄：測試驅動開發 (TDD) 與驗證指南
 
-現代 LLM 的參數規模巨大（數十億到數千億），這使得原始 Transformer（如 2017 年的 Post-LN Transformer）在訓練時極易崩潰。以下三項關鍵技術是近年來大模型能夠成功訓練的基石。
+現在專案結構已重構完畢，您可以使用我們安排的單元測試，來進行自我實作檢驗。
 
-### 4.1 RMSNorm (均方根歸一化)
-
-傳統的 LayerNorm 通過計算特徵的均值和變異數來穩定激活值分佈：
-$$\text{LayerNorm}(x) = \frac{x - \mu}{\sqrt{\sigma^2 + \epsilon}} \odot \gamma + \beta$$
-
-論文研究發現，LayerNorm 的穩定性主要來自於**分母（變異數）的縮放**，而分子扣除均值（$\mu$）的平移操作對模型的穩定性貢獻不大，卻增加了計算開銷。
-**RMSNorm** 去除了均值計算，直接使用 Root Mean Square 進行縮放：
-
-$$\text{RMSNorm}(x) = \frac{x}{\text{RMS}(x)} \odot \gamma$$
-$$\text{RMS}(x) = \sqrt{\frac{1}{d} \sum_{i=1}^d x_i^2 + \epsilon}$$
-
-這使得大模型每一層的向前與向後傳播速度提升了 10%～50%。
-
----
-
-### 4.2 SwiGLU (Swish 門控線性單元)
-
-傳統 Transformer 使用兩層 Linear 搭配 ReLU 激活函數作為前饋網路（FFN）：
-$$\text{FFN}(x) = \max(0, x W_1 + b_1) W_2 + b_2$$
-
-現代大模型使用 **SwiGLU** 替代它。GLU（Gated Linear Unit）的核心是**門控機制**：一個線性分支負責處理資訊，另一個線性分支通過非線性激活後作為「開關」，控制資訊的流動。
-SwiGLU 選擇使用 Swish（在 PyTorch 中常稱為 SiLU）作為其激活函數：
-
-$$\text{SwiGLU}(x) = (\text{Swish}(x W_{gate}) \odot x W_{up}) W_{down}$$
-
-> [!TIP]
-> SwiGLU 通過增加一個權重矩陣（原本是兩個，現在是三個），提供了更平滑的非線性表達能力與更穩定的梯度，已被證明能顯著加快模型的收斂速度。
-
----
-
-### 4.3 RoPE (旋轉位置編碼)
-
-傳統的正弦位置編碼是**加算式**（Additive）的，這使得注意力機制在計算 Query 和 Key 的內積時，相對位置資訊很容易在矩陣相乘中被「稀釋」或打亂。
-
-**RoPE（Rotary Position Embedding）** 提出了一種極其優雅的方法：將 2D 平面中的向量旋轉一個角度。
-具體來說，它將 Query 和 Key 向量每兩個維度分組，視為複數平面上的一個點，並根據其所在的序列絕對位置 $m$ 進行旋轉：
-
-$$\text{RoPE}(x_m) = \begin{pmatrix} \cos m\theta & -\sin m\theta \\ \sin m\theta & \cos m\theta \end{pmatrix} \begin{pmatrix} x_{m, 1} \\ x_{m, 2} \end{pmatrix}$$
-
-#### 為什麼 RoPE 能自然捕捉相對距離？
-由於旋轉矩陣具有正交性，旋轉後的 Query $q_m$ 與 Key $k_n$ 的內積為：
-$$(\mathbf{R}_{m} q)^T (\mathbf{R}_{n} k) = q^T \mathbf{R}_{m}^T \mathbf{R}_{n} k = q^T \mathbf{R}_{n - m} k$$
-內積結果**只與它們的相對距離 $n - m$ 有關**！這賦予了模型極強的外推能力（Extrapolation），也就是說，模型即使在短序列上訓練，也能自然推展到較長的文本長度。
-
----
-
-## 第五章：經典 Transformer 與 Decoder-Only LLM 的組裝
-
-在掌握了上述組件後，我們可以將它們組裝成兩種架構：
-
-1.  **經典 Seq2Seq Transformer**
-    *   **結構**：包含獨立的 Encoder（解讀源序列）與 Decoder（藉由 Cross-Attention 參照 Encoder 的輸出，自迴歸生成目標序列）。
-    *   **用途**：機器翻譯、文章摘要。
-2.  **Decoder-Only LLM (現代大模型主流)**
-    *   **結構**：只有解碼器堆疊。所有 Token 都在一個統一的序列中，使用 Causal Mask 防止未來資訊洩漏。
-    *   **技術棧**：Pre-LN (RMSNorm) + GQA + RoPE + SwiGLU。
-    *   **用途**：ChatGPT, LLaMA, Claude 等通用生成式對話模型。
-
----
-
-## 附錄：如何使用本專案進行自我驗證 (測試驅動學習)
-
-本專案目錄內包含一整套對齊測試代碼。這就是你的 **Superpowers**：
-
-### 驗證步驟
-
-1.  **安裝測試環境**：
-    確保處於專案根目錄下，安裝所需的套件：
+1.  **安裝依賴**：
     ```bash
     pip install -r requirements.txt
     ```
-2.  **執行測試驗證**：
-    當你開始在 `src/transformer/` 中撰寫程式碼時，可以隨時使用以下指令檢驗進度：
+2.  **執行基礎單元測試**：
+    當您寫完基礎層或優化器後，請執行：
+    ```bash
+    pytest tests/test_foundations.py
+    ```
+3.  **執行 Transformer 測試**：
     ```bash
     pytest tests/test_transformer.py
     ```
-3.  **觀看測試結果**：
-    *   **Fail / Error**：表示你的數學實作、矩陣乘法維度或偏置相加有誤。
-    *   **Pass (綠燈)**：恭喜！代表你的自製 Transformer/LLM 組件與 LLaMA 等前沿架構的理論對齊一致。
 
----
-
-祝你學習愉快！現在，就從編輯 [rnn_cell.py](file:///Users/yuhan/coding/ai_knowledge/src/rnn/rnn_cell.py) 或 [attention.py](file:///Users/yuhan/coding/ai_knowledge/src/transformer/attention.py) 開始你的實作之旅吧！
+綠燈（Pass）代表您的自製組件在數學上完全正確。祝您手寫 AI 順利！
