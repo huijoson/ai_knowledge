@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>從零開始：深入理解深度學習與大語言模型核心架構 — 線上讀書器</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- KaTeX for Math Equations -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+    
+    <!-- Highlight.js for Syntax Highlighting -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@11.8.0/styles/tokyo-night-dark.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/highlight.js@11.8.0/highlight.min.js"></script>
+    
+    <!-- Marked for Markdown Parsing -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+    <style>
+        :root {
+            --bg-color: #0b0f19;
+            --container-bg: rgba(17, 24, 39, 0.7);
+            --sidebar-bg: rgba(15, 23, 42, 0.9);
+            --text-primary: #f3f4f6;
+            --text-secondary: #9ca3af;
+            --accent-color: #6366f1;
+            --accent-hover: #4f46e5;
+            --border-color: rgba(255, 255, 255, 0.08);
+            --code-bg: #1e293b;
+            --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            --font-mono: 'Fira Code', monospace;
+        }
+
+        .light-theme {
+            --bg-color: #f8fafc;
+            --container-bg: rgba(255, 255, 255, 0.8);
+            --sidebar-bg: rgba(241, 245, 249, 0.95);
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --accent-color: #4f46e5;
+            --accent-hover: #3730a3;
+            --border-color: rgba(0, 0, 0, 0.08);
+            --code-bg: #f1f5f9;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+        }
+
+        body {
+            font-family: var(--font-sans);
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Reading Progress Bar */
+        #progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #6366f1, #a855f7);
+            width: 0%;
+            z-index: 1000;
+        }
+
+        /* Sidebar Styling */
+        aside {
+            width: 320px;
+            background-color: var(--sidebar-bg);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            flex-shrink: 0;
+            z-index: 100;
+            backdrop-filter: blur(12px);
+        }
+
+        .sidebar-header {
+            padding: 24px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .sidebar-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #a855f7, #6366f1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .toc-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px 16px;
+        }
+
+        .toc-item {
+            display: block;
+            padding: 10px 12px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            margin-bottom: 4px;
+            line-height: 1.4;
+            cursor: pointer;
+        }
+
+        .toc-item:hover {
+            background-color: var(--border-color);
+            color: var(--text-primary);
+        }
+
+        .toc-item.active {
+            background-color: var(--accent-color);
+            color: #ffffff;
+            font-weight: 500;
+        }
+
+        .toc-h1 { font-weight: 600; padding-left: 12px; }
+        .toc-h2 { padding-left: 24px; font-size: 0.85rem; }
+        .toc-h3 { padding-left: 36px; font-size: 0.8rem; display: none; } /* Hide h3 for cleaner TOC */
+
+        /* Main Content Styling */
+        main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            overflow: hidden;
+            position: relative;
+        }
+
+        header {
+            height: 70px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 40px;
+            backdrop-filter: blur(12px);
+            background-color: rgba(11, 15, 25, 0.3);
+            z-index: 50;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .toggle-sidebar-btn {
+            background: none;
+            border: none;
+            color: var(--text-primary);
+            cursor: pointer;
+            font-size: 1.2rem;
+            display: none; /* Show only on mobile */
+        }
+
+        .theme-toggle-btn {
+            background: var(--border-color);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .theme-toggle-btn:hover {
+            background-color: var(--accent-color);
+            color: #ffffff;
+        }
+
+        .content-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 60px 80px;
+            scroll-behavior: smooth;
+        }
+
+        .content-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        /* Typography of markdown */
+        #markdown-content {
+            line-height: 1.8;
+            font-size: 1.05rem;
+        }
+
+        #markdown-content h1, 
+        #markdown-content h2, 
+        #markdown-content h3 {
+            margin-top: 2.2rem;
+            margin-bottom: 1rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            scroll-margin-top: 90px;
+        }
+
+        #markdown-content h1 {
+            font-size: 2.2rem;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 12px;
+            margin-top: 1rem;
+        }
+
+        #markdown-content h2 {
+            font-size: 1.6rem;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 8px;
+        }
+
+        #markdown-content h3 {
+            font-size: 1.25rem;
+        }
+
+        #markdown-content p {
+            margin-bottom: 1.5rem;
+            color: var(--text-secondary);
+        }
+
+        .light-theme #markdown-content p {
+            color: #334155;
+        }
+
+        #markdown-content ul, 
+        #markdown-content ol {
+            margin-bottom: 1.5rem;
+            padding-left: 24px;
+            color: var(--text-secondary);
+        }
+
+        .light-theme #markdown-content ul,
+        .light-theme #markdown-content ol {
+            color: #334155;
+        }
+
+        #markdown-content li {
+            margin-bottom: 0.5rem;
+        }
+
+        #markdown-content code {
+            font-family: var(--font-mono);
+            background-color: var(--code-bg);
+            padding: 3px 6px;
+            border-radius: 4px;
+            font-size: 0.9em;
+            color: #f43f5e;
+        }
+
+        #markdown-content pre {
+            margin: 1.8rem 0;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+        }
+
+        #markdown-content pre code {
+            display: block;
+            padding: 20px;
+            overflow-x: auto;
+            background-color: #0d1117 !important;
+            color: #c9d1d9;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        /* KaTeX Block Adjustments */
+        .katex-display {
+            margin: 1.5em 0;
+            overflow-x: auto;
+            overflow-y: hidden;
+            padding: 10px 0;
+        }
+
+        /* Custom Alert Blocks */
+        blockquote {
+            margin: 1.8rem 0;
+            padding: 16px 20px;
+            border-left: 4px solid var(--accent-color);
+            background-color: rgba(99, 102, 241, 0.08);
+            border-radius: 0 8px 8px 0;
+        }
+
+        blockquote p {
+            margin-bottom: 0 !important;
+            color: var(--text-primary) !important;
+            font-weight: 500;
+        }
+
+        blockquote strong {
+            color: var(--accent-color);
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 900px) {
+            aside {
+                position: absolute;
+                left: -320px;
+                transition: transform 0.3s ease;
+            }
+
+            aside.open {
+                transform: translateX(320px);
+            }
+
+            .toggle-sidebar-btn {
+                display: block;
+            }
+
+            header {
+                padding: 0 20px;
+            }
+
+            .content-body {
+                padding: 40px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="progress-bar"></div>
+
+    <!-- Sidebar / TOC -->
+    <aside id="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-title">AI Book Reader</div>
+            <button class="theme-toggle-btn" id="sidebar-close-btn" style="display: none;">✕</button>
+        </div>
+        <div class="toc-container" id="toc">
+            <!-- TOC links generated dynamically -->
+        </div>
+    </aside>
+
+    <!-- Main Reading Content -->
+    <main>
+        <header>
+            <div class="header-left">
+                <button class="toggle-sidebar-btn" id="menu-toggle">☰</button>
+                <h2 style="font-size: 1.1rem; font-weight: 600;" id="current-chapter-title">從零開始學 AI</h2>
+            </div>
+            <button class="theme-toggle-btn" id="theme-toggle">
+                <span id="theme-icon">☀️</span> <span id="theme-text">Light Mode</span>
+            </button>
+        </header>
+
+        <div class="content-body" id="scroll-container">
+            <div class="content-container">
+                <article id="markdown-content">
+                    <p style="text-align: center; color: var(--text-secondary); margin-top: 100px;">正在載入書籍內容，請稍候...</p>
+                </article>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Theme Management
+        const themeToggle = document.getElementById('theme-toggle');
+        const themeIcon = document.getElementById('theme-icon');
+        const themeText = document.getElementById('theme-text');
+        
+        themeToggle.addEventListener('click', () => {
+            document.body.classList.toggle('light-theme');
+            const isLight = document.body.classList.contains('light-theme');
+            themeIcon.textContent = isLight ? '🌙' : '☀️';
+            themeText.textContent = isLight ? 'Dark Mode' : 'Light Mode';
+            localStorage.setItem('theme', isLight ? 'light' : 'dark');
+        });
+
+        // Load saved theme
+        if (localStorage.getItem('theme') === 'light') {
+            document.body.classList.add('light-theme');
+            themeIcon.textContent = '🌙';
+            themeText.textContent = 'Dark Mode';
+        }
+
+        // Sidebar Toggle for Mobile
+        const menuToggle = document.getElementById('menu-toggle');
+        const sidebar = document.getElementById('sidebar');
+        
+        menuToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('open');
+        });
+
+        // Reading Progress Indicator
+        const scrollContainer = document.getElementById('scroll-container');
+        const progressBar = document.getElementById('progress-bar');
+        
+        scrollContainer.addEventListener('scroll', () => {
+            const totalHeight = scrollContainer.scrollHeight - scrollContainer.clientHeight;
+            if (totalHeight > 0) {
+                const progress = (scrollContainer.scrollTop / totalHeight) * 100;
+                progressBar.style.width = `${progress}%`;
+            }
+        });
+
+        // Fetch and Render Markdown
+        async function loadBook() {
+            try {
+                const response = await fetch('AI_Knowledge_Book.md');
+                if (!response.ok) throw new Error('無法讀取 AI_Knowledge_Book.md，請確認檔案是否存在於同級目錄中');
+                let markdown = await response.text();
+
+                // 1. Math preprocessing (Extract math so marked doesn't escape it)
+                const mathBlocks = [];
+                const mathInlines = [];
+
+                // Replace Block Math $$...$$
+                markdown = markdown.replace(/\$\$([\s\S]+?)\$\$/g, (match, math) => {
+                    mathBlocks.push(math.trim());
+                    return `@@BLOCKMATH_${mathBlocks.length - 1}@@`;
+                });
+
+                // Replace Inline Math $...$
+                markdown = markdown.replace(/\$([^$\n]+?)\$/g, (match, math) => {
+                    mathInlines.push(math.trim());
+                    return `@@INLINEMATH_${mathInlines.length - 1}@@`;
+                });
+
+                // Custom renderer for alerts (e.g. > [!NOTE] or > [!TIP])
+                const renderer = new marked.Renderer();
+                
+                const originalBlockquote = renderer.blockquote.bind(renderer);
+                renderer.blockquote = (quote) => {
+                    let alertType = "";
+                    let cleanQuote = quote;
+                    
+                    if (quote.includes("[!NOTE]")) {
+                        alertType = "NOTE";
+                        cleanQuote = quote.replace(/\[!NOTE\]\s*/g, "<strong>📌 學習筆記</strong>");
+                    } else if (quote.includes("[!TIP]")) {
+                        alertType = "TIP";
+                        cleanQuote = quote.replace(/\[!TIP\]\s*/g, "<strong>💡 實作技巧</strong>");
+                    } else if (quote.includes("[!IMPORTANT]")) {
+                        alertType = "IMPORTANT";
+                        cleanQuote = quote.replace(/\[!IMPORTANT\]\s*/g, "<strong>⚠️ 重要事項</strong>");
+                    }
+                    
+                    if (alertType) {
+                        return `<blockquote class="alert-${alertType.toLowerCase()}">${cleanQuote}</blockquote>`;
+                    }
+                    return originalBlockquote(quote);
+                };
+
+                marked.setOptions({
+                    renderer: renderer,
+                    highlight: function(code, lang) {
+                        const language = hljs.getLanguage(lang) ? lang : 'plaintext';
+                        return hljs.highlight(code, { language }).value;
+                    },
+                    langPrefix: 'hljs language-'
+                });
+
+                // 2. Parse Markdown
+                let html = marked.parse(markdown);
+
+                // 3. Post-process: Insert rendered LaTeX back into HTML
+                html = html.replace(/@@BLOCKMATH_(\d+)@@/g, (match, index) => {
+                    try {
+                        return katex.renderToString(mathBlocks[index], { displayMode: true, throwOnError: false });
+                    } catch (e) {
+                        return `<span style="color:red">${mathBlocks[index]}</span>`;
+                    }
+                });
+
+                html = html.replace(/@@INLINEMATH_(\d+)@@/g, (match, index) => {
+                    try {
+                        return katex.renderToString(mathInlines[index], { displayMode: false, throwOnError: false });
+                    } catch (e) {
+                        return `<span style="color:red">${mathInlines[index]}</span>`;
+                    }
+                });
+
+                // Insert into page
+                document.getElementById('markdown-content').innerHTML = html;
+
+                // 4. Generate Table of Contents
+                buildTOC();
+                
+                // Trigger Highlight.js manually if needed
+                document.querySelectorAll('pre code').forEach((el) => {
+                    hljs.highlightElement(el);
+                });
+
+            } catch (err) {
+                document.getElementById('markdown-content').innerHTML = `
+                    <div style="color: #f43f5e; padding: 20px; border: 1px solid #f43f5e; border-radius: 8px; background-color: rgba(244, 63, 94, 0.1);">
+                        <h3>讀取失敗</h3>
+                        <p>${err.message}</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Build Table of Contents
+        function buildTOC() {
+            const tocContainer = document.getElementById('toc');
+            const headings = document.getElementById('markdown-content').querySelectorAll('h1, h2, h3');
+            tocContainer.innerHTML = '';
+
+            headings.forEach((heading, index) => {
+                // Generate a unique ID if not present
+                if (!heading.id) {
+                    heading.id = `heading-${index}`;
+                }
+
+                const item = document.createElement('a');
+                item.href = `#${heading.id}`;
+                item.className = `toc-item toc-${heading.tagName.toLowerCase()}`;
+                
+                // Remove emojis or special Markdown syntax from TOC titles
+                item.textContent = heading.textContent.replace(/[📌💡⚠️📖]/g, '').trim();
+                
+                item.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    heading.scrollIntoView({ behavior: 'smooth' });
+                    
+                    // Close sidebar on mobile
+                    sidebar.classList.remove('open');
+                    
+                    // Highlight active TOC
+                    document.querySelectorAll('.toc-item').forEach(el => el.classList.remove('active'));
+                    item.classList.add('active');
+                    document.getElementById('current-chapter-title').textContent = item.textContent;
+                });
+
+                tocContainer.appendChild(item);
+            });
+
+            // Set up intersection observer to highlight TOC as user scrolls
+            const observerOptions = {
+                root: scrollContainer,
+                rootMargin: '0px 0px -60% 0px',
+                threshold: 0
+            };
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const id = entry.target.id;
+                        const tocItem = document.querySelector(`.toc-item[href="#${id}"]`);
+                        if (tocItem) {
+                            document.querySelectorAll('.toc-item').forEach(el => el.classList.remove('active'));
+                            tocItem.classList.add('active');
+                            document.getElementById('current-chapter-title').textContent = tocItem.textContent;
+                        }
+                    }
+                });
+            }, observerOptions);
+
+            headings.forEach(heading => observer.observe(heading));
+        }
+
+        // Initialize Page
+        window.addEventListener('DOMContentLoaded', loadBook);
+    </script>
+</body>
+</html>
