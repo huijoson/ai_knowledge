@@ -470,10 +470,6 @@
 
                 marked.setOptions({
                     renderer: renderer,
-                    highlight: function(code, lang) {
-                        const language = hljs.getLanguage(lang) ? lang : 'plaintext';
-                        return hljs.highlight(code, { language }).value;
-                    },
                     langPrefix: 'hljs language-'
                 });
 
@@ -503,10 +499,12 @@
                 // 4. Generate Table of Contents
                 buildTOC();
                 
-                // Trigger Highlight.js manually if needed
-                document.querySelectorAll('pre code').forEach((el) => {
-                    hljs.highlightElement(el);
-                });
+                // Trigger Highlight.js manually if available
+                if (typeof hljs !== 'undefined') {
+                    document.querySelectorAll('pre code').forEach((el) => {
+                        hljs.highlightElement(el);
+                    });
+                }
 
             } catch (err) {
                 document.getElementById('markdown-content').innerHTML = `
