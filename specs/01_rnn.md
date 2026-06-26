@@ -1,60 +1,60 @@
-# Specification: Recurrent Neural Networks (RNN & LSTM)
+# 規格說明：循環神經網路 (RNN & LSTM)
 
-This specification defines the behavior, mathematical formulas, tensor shapes, and verification guidelines for implementing custom RNN and LSTM cells in PyTorch.
-
----
-
-## 1. Module Overview
-Recurrent Neural Networks model sequential data by maintaining a hidden state $h_t$ that carries information from previous steps.
+本規格書定義了在 PyTorch 中實作自訂 RNN 與 LSTM Cell 的行為、數學公式、張量維度（Tensor Shapes）以及驗證指引。
 
 ---
 
-## 2. Mathematical Definition
+## 1. 模組概述
+循環神經網路（RNN）藉由維護一個在時間步之間傳遞的隱藏狀態 $h_t$，來對序列資料進行建模。
 
-### 2.1 Standard RNN Cell
-For each step in the sequence, the hidden state $h_t$ is updated as:
+---
+
+## 2. 數學定義
+
+### 2.1 標準 RNN Cell
+對於序列中的每一個時間步，隱藏狀態 $h_t$ 更新如下：
 $$h_t = \tanh(X_t W_{ih}^T + b_{ih} + h_{t-1} W_{hh}^T + b_{hh})$$
 
 ### 2.2 LSTM Cell
-For each step in the sequence, the cell state $C_t$ and hidden state $h_t$ are updated using four gates:
-1.  **Forget Gate**: controls how much of the past cell state to keep.
+對於序列中的每一個時間步，細胞狀態 $C_t$ 和隱藏狀態 $h_t$ 經由四個控制門更新：
+1.  **遺忘門 ($f_t$)**：決定要丟棄多少舊有的細胞狀態。
     $$f_t = \sigma(X_t W_{if}^T + b_{if} + h_{t-1} W_{hf}^T + b_{hf})$$
-2.  **Input Gate**: controls how much new information to add.
+2.  **輸入門 ($i_t$)**：決定要寫入多少新的資訊。
     $$i_t = \sigma(X_t W_{ii}^T + b_{ii} + h_{t-1} W_{hi}^T + b_{hi})$$
-3.  **Candidate Cell State**: the proposed new values.
+3.  **候選細胞狀態 ($\tilde{C}_t$)**：準備寫入的新記憶候選值。
     $$\tilde{C}_t = \tanh(X_t W_{ig}^T + b_{ig} + h_{t-1} W_{hg}^T + b_{hg})$$
-4.  **Cell State Update**:
+4.  **細胞狀態更新 ($C_t$)**：
     $$C_t = f_t \odot C_{t-1} + i_t \odot \tilde{C}_t$$
-5.  **Output Gate**: controls what to output.
+5.  **輸出門 ($o_t$)**：決定要輸出哪些部分的隱藏狀態。
     $$o_t = \sigma(X_t W_{io}^T + b_{io} + h_{t-1} W_{ho}^T + b_{ho})$$
-6.  **Hidden State Update**:
+6.  **隱藏狀態更新 ($h_t$)**：
     $$h_t = o_t \odot \tanh(C_t)$$
 
-Where:
-*   $\sigma$ is the Sigmoid activation function.
-*   $\odot$ is the element-wise (Hadamard) product.
+其中：
+*   $\sigma$ 代表 Sigmoid 激活函數。
+*   $\odot$ 代表按元素相乘（Hadamard Product）。
 
 ---
 
-## 3. Tensor Shapes
+## 3. 張量維度 (Tensor Shapes)
 
-| Variable / Parameter | Shape | Description |
+| 變數 / 參數 | 維度 (Shape) | 描述 |
 | :--- | :--- | :--- |
-| `x` (Input step) | `(B, D_in)` | Current input at step $t$ for batch size $B$ and input dimension $D_{in}$ |
-| `h` (Hidden state) | `(B, D_hid)` | Hidden state from step $t-1$ |
-| `c` (Cell state, LSTM only) | `(B, D_hid)` | Cell state from step $t-1$ |
-| `W_ih` / `W_ix` | `(D_hid, D_in)` | Input-to-hidden weights |
-| `W_hh` | `(D_hid, D_hid)` | Hidden-to-hidden weights |
-| `b_ih` / `b_hh` | `(D_hid,)` | Biases |
+| `x` (目前步輸入) | `(B, D_in)` | Batch 大小為 $B$，輸入特徵維度為 $D_{in}$ 的當前輸入 |
+| `h` (隱藏狀態) | `(B, D_hid)` | 來自前一步的隱藏狀態 |
+| `c` (細胞狀態，僅 LSTM) | `(B, D_hid)` | 來自前一步的細胞狀態 |
+| `W_ih` / `W_ix` | `(D_hid, D_in)` | 輸入到隱藏層的權重 |
+| `W_hh` | `(D_hid, D_hid)` | 循環隱藏層權重 |
+| `b_ih` / `b_hh` | `(D_hid,)` | 偏置 (Biases) |
 
 ---
 
-## 4. Verification Requirements (Tests)
+## 4. 驗證要求 (單元測試)
 
-To verify the implementation (adhering to Superpowers workflow):
-1.  **Shape Verification**: Ensure outputs match `(B, D_hid)`.
-2.  **Equivalence with PyTorch**:
-    *   Initialize your custom cells.
-    *   Initialize PyTorch's native `nn.RNNCell` and `nn.LSTMCell` with the exact same weights and biases.
-    *   Compare forward pass outputs; maximum absolute difference should be $< 1\times 10^{-6}$.
-3.  **Gradient Flow**: Perform a backward pass on a loss term and ensure all parameters receive non-zero gradients (no dead gradient paths).
+為確保實作正確（遵循 Superpowers 測試驗證流程）：
+1.  **維度驗證**：確保輸出形狀與 `(B, D_hid)` 完全一致。
+2.  **與 PyTorch 等價性測試**：
+    *   初始化您的自訂 Cell。
+    *   以相同的權重與偏置初始化 PyTorch 原生的 `nn.RNNCell` 與 `nn.LSTMCell`。
+    *   比較前向傳播的輸出結果，最大絕對誤差需 $< 1\times 10^{-6}$。
+3.  **梯度流動測試**：對輸出求和並進行反向傳播，確保所有參數都能接收到非零梯度。
