@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>從零開始：深入理解深度學習與大語言模型核心架構 — 線上讀書器</title>
+    <title>從零手刻 LLM：Transformer 核心原理互動電子書 — 線上讀書器</title>
     
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -542,6 +542,186 @@
             transition: all 0.3s;
         }
 
+
+
+        /* LLM-first visualizers */
+        .viz-note {
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            margin: 8px 0 14px;
+        }
+
+        .flow-strip {
+            display: flex;
+            align-items: stretch;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin: 16px 0;
+        }
+
+        .flow-node {
+            flex: 1;
+            min-width: 110px;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 12px;
+            background: rgba(99, 102, 241, 0.08);
+            text-align: center;
+            position: relative;
+        }
+
+        .flow-node.active {
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.25), 0 0 18px rgba(99, 102, 241, 0.25);
+            transform: translateY(-2px);
+        }
+
+        .flow-node .label {
+            display: block;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-bottom: 6px;
+        }
+
+        .flow-node .value {
+            font-family: var(--font-mono);
+            font-size: 0.78rem;
+            color: var(--text-primary);
+            word-break: break-word;
+        }
+
+        .shape-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 12px;
+            margin-top: 14px;
+        }
+
+        .shape-card {
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 12px;
+            background: rgba(0,0,0,0.10);
+        }
+
+        .shape-card strong {
+            color: var(--accent-color);
+        }
+
+        .shape-card code, .viz-code {
+            font-family: var(--font-mono);
+            color: #a855f7;
+            font-size: 0.86rem;
+        }
+
+        .viz-output {
+            margin-top: 12px;
+            padding: 12px;
+            border-radius: 10px;
+            background: rgba(0,0,0,0.16);
+            border: 1px solid var(--border-color);
+            font-family: var(--font-mono);
+            font-size: 0.86rem;
+            color: var(--text-primary);
+            overflow-x: auto;
+        }
+
+        .mask-matrix {
+            display: grid;
+            gap: 6px;
+            justify-content: center;
+            margin: 16px 0;
+        }
+
+        .mask-cell {
+            width: 58px;
+            height: 46px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--font-mono);
+            font-size: 0.78rem;
+            background: rgba(0,0,0,0.12);
+        }
+
+        .mask-cell.allowed {
+            background: rgba(34, 197, 94, 0.20);
+            border-color: rgba(34, 197, 94, 0.55);
+        }
+
+        .mask-cell.blocked {
+            background: rgba(244, 63, 94, 0.18);
+            border-color: rgba(244, 63, 94, 0.45);
+            color: #fca5a5;
+        }
+
+        .rope-stage {
+            display: grid;
+            grid-template-columns: minmax(240px, 1fr) minmax(220px, 1fr);
+            gap: 18px;
+            align-items: center;
+        }
+
+        .rope-canvas {
+            width: 100%;
+            min-height: 230px;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            background: radial-gradient(circle at center, rgba(99,102,241,0.15), rgba(0,0,0,0.10));
+        }
+
+        .cache-row {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            margin: 8px 0 14px;
+        }
+
+        .cache-token {
+            padding: 8px 10px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background: rgba(99, 102, 241, 0.12);
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+        }
+
+        .cache-token.new {
+            background: rgba(168, 85, 247, 0.25);
+            border-color: #a855f7;
+        }
+
+        .mini-llm-layers {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .mini-layer {
+            display: grid;
+            grid-template-columns: 1.4fr 1fr;
+            gap: 10px;
+            align-items: center;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 10px 12px;
+            background: rgba(0,0,0,0.10);
+        }
+
+        .mini-layer.active {
+            border-color: var(--accent-color);
+            background: rgba(99, 102, 241, 0.16);
+        }
+
+        @media (max-width: 700px) {
+            .rope-stage { grid-template-columns: 1fr; }
+            .mask-cell { width: 44px; height: 38px; font-size: 0.68rem; }
+            .mini-layer { grid-template-columns: 1fr; }
+        }
+
         /* Responsive Design */
         @media (max-width: 900px) {
             aside {
@@ -574,7 +754,7 @@
     <!-- Sidebar / TOC -->
     <aside id="sidebar">
         <div class="sidebar-header">
-            <div class="sidebar-title">AI Book Reader</div>
+            <div class="sidebar-title">LLM Interactive Book</div>
             <button class="theme-toggle-btn" id="sidebar-close-btn" style="display: none;">✕</button>
         </div>
         <div class="toc-container" id="toc">
@@ -731,9 +911,15 @@
                 }
 
                 // 5. Initialize Interactive Visualizers
+                initLlmFlowVisualizer();
+                initTensorShapeVisualizer();
                 initAutogradVisualizer();
                 initCnnVisualizer();
                 initAttentionVisualizer();
+                initCausalMaskVisualizer();
+                initRopeVisualizer();
+                initKvCacheVisualizer();
+                initMiniLlmVisualizer();
 
             } catch (err) {
                 document.getElementById('markdown-content').innerHTML = `
@@ -1225,6 +1411,243 @@
                 attnInfo.innerHTML = textResult.slice(0, -3);
             }
         }
+
+
+
+        // --- 4. LLM Data Flow Visualizer ---
+        function initLlmFlowVisualizer() {
+            const container = document.getElementById('llm-flow-visualizer');
+            if (!container) return;
+            const steps = [
+                ['文字', '我 喜歡 學 AI'],
+                ['Tokens', '[我, 喜歡, 學, AI]'],
+                ['Token IDs', '[3, 8, 12, 20]'],
+                ['Embedding', '(1, 4, 8)'],
+                ['Transformer Blocks', '(1, 4, 8)'],
+                ['LM Head', 'logits: (1, 4, 32)'],
+                ['Next Token', '「原理」 42%']
+            ];
+            container.innerHTML = `
+                <div class="visualizer-title">
+                    <span>LLM 資料流：文字如何變成下一個 Token</span>
+                    <button class="btn" id="btn-llm-flow">逐步播放</button>
+                </div>
+                <p class="viz-note">觀察一段文字如何經過 tokenizer、embedding、Transformer block，最後變成 vocabulary 上的 logits。</p>
+                <div class="flow-strip" id="llm-flow-strip"></div>
+                <div class="viz-output" id="llm-flow-info">點擊「逐步播放」開始。</div>
+            `;
+            const strip = document.getElementById('llm-flow-strip');
+            const info = document.getElementById('llm-flow-info');
+            steps.forEach(([label, value], i) => {
+                const node = document.createElement('div');
+                node.className = 'flow-node';
+                node.id = `llm-flow-node-${i}`;
+                node.innerHTML = `<span class="label">${i + 1}. ${label}</span><span class="value">${value}</span>`;
+                strip.appendChild(node);
+            });
+            let idx = -1;
+            document.getElementById('btn-llm-flow').addEventListener('click', () => {
+                idx = (idx + 1) % steps.length;
+                document.querySelectorAll('#llm-flow-strip .flow-node').forEach((n, i) => n.classList.toggle('active', i === idx));
+                info.innerHTML = `<strong>${steps[idx][0]}</strong>：${steps[idx][1]}<br><span style="color:var(--text-secondary)">目前 shape / 狀態會在每一步清楚標出。</span>`;
+            });
+        }
+
+        // --- 5. Tensor Shape Visualizer ---
+        function initTensorShapeVisualizer() {
+            const container = document.getElementById('tensor-shape-visualizer');
+            if (!container) return;
+            container.innerHTML = `
+                <div class="visualizer-title"><span>Tensor Shape Visualizer：調整 B/T/C/H</span></div>
+                <div class="control-row">
+                    <div class="slider-group"><label>B Batch = <span id="shape-b-val">2</span></label><input id="shape-b" type="range" min="1" max="4" value="2"></div>
+                    <div class="slider-group"><label>T Tokens = <span id="shape-t-val">4</span></label><input id="shape-t" type="range" min="1" max="8" value="4"></div>
+                    <div class="slider-group"><label>C Hidden = <span id="shape-c-val">8</span></label><input id="shape-c" type="range" min="4" max="32" step="4" value="8"></div>
+                    <div class="slider-group"><label>H Heads = <span id="shape-h-val">2</span></label><input id="shape-h" type="range" min="1" max="8" value="2"></div>
+                </div>
+                <div class="shape-grid" id="shape-output"></div>
+            `;
+            const ids = ['b','t','c','h'];
+            ids.forEach(id => document.getElementById(`shape-${id}`).addEventListener('input', render));
+            function render() {
+                let B = +document.getElementById('shape-b').value;
+                let T = +document.getElementById('shape-t').value;
+                let C = +document.getElementById('shape-c').value;
+                let H = +document.getElementById('shape-h').value;
+                if (C % H !== 0) H = [...Array(8).keys()].map(x => x + 1).filter(x => C % x === 0).reduce((a,b) => Math.abs(b-H)<Math.abs(a-H)?b:a, 1);
+                document.getElementById('shape-h').value = H;
+                const D = C / H;
+                document.getElementById('shape-b-val').textContent = B;
+                document.getElementById('shape-t-val').textContent = T;
+                document.getElementById('shape-c-val').textContent = C;
+                document.getElementById('shape-h-val').textContent = H;
+                document.getElementById('shape-output').innerHTML = [
+                    ['input_ids', `(${B}, ${T})`, '文字 token 的整數 ID'],
+                    ['embedding', `(${B}, ${T}, ${C})`, '每個 token 的 hidden vector'],
+                    ['q/k/v', `(${B}, ${T}, ${C})`, 'Linear projection 後'],
+                    ['split heads', `(${B}, ${H}, ${T}, ${D})`, '拆成多個注意力頭'],
+                    ['attention scores', `(${B}, ${H}, ${T}, ${T})`, '每個 token 看每個 token'],
+                    ['logits', `(${B}, ${T}, V)`, '對 vocabulary 的分數']
+                ].map(([name, shape, desc]) => `<div class="shape-card"><strong>${name}</strong><br><code>${shape}</code><br><span class="viz-note">${desc}</span></div>`).join('');
+            }
+            render();
+        }
+
+        // --- 6. Causal Mask Visualizer ---
+        function initCausalMaskVisualizer() {
+            const container = document.getElementById('causal-mask-visualizer');
+            if (!container) return;
+            const tokens = ['我', '喜歡', '學', 'AI'];
+            container.innerHTML = `
+                <div class="visualizer-title"><span>Causal Mask：Decoder-only LLM 不能偷看未來</span></div>
+                <p class="viz-note">列代表 Query token，欄代表它可以看的 Key token。紅色 ❌ 會在 softmax 前被設成 -∞。</p>
+                <div class="mask-matrix" id="causal-mask-grid"></div>
+                <div class="viz-output" id="causal-mask-info">點擊任一列查看該 token 可見範圍。</div>
+            `;
+            const grid = document.getElementById('causal-mask-grid');
+            grid.style.gridTemplateColumns = `repeat(${tokens.length + 1}, 58px)`;
+            grid.appendChild(maskCell('', ''));
+            tokens.forEach(t => grid.appendChild(maskCell(t, '')));
+            tokens.forEach((rowTok, r) => {
+                grid.appendChild(maskCell(rowTok, ''));
+                tokens.forEach((colTok, c) => {
+                    const allowed = c <= r;
+                    const cell = maskCell(allowed ? '✅' : '❌', allowed ? 'allowed' : 'blocked');
+                    cell.title = `${rowTok} ${allowed ? '可以看' : '不能看'} ${colTok}`;
+                    cell.addEventListener('click', () => {
+                        document.getElementById('causal-mask-info').innerHTML = `<strong>${rowTok}</strong> 只能看：${tokens.slice(0, r + 1).join('、')}<br><span style="color:var(--text-secondary)">未來 token：${tokens.slice(r + 1).join('、') || '無'} → attention weight = 0</span>`;
+                    });
+                    grid.appendChild(cell);
+                });
+            });
+            function maskCell(text, cls) {
+                const div = document.createElement('div');
+                div.className = `mask-cell ${cls}`;
+                div.textContent = text;
+                return div;
+            }
+        }
+
+        // --- 7. RoPE Rotation Visualizer ---
+        function initRopeVisualizer() {
+            const container = document.getElementById('rope-visualizer');
+            if (!container) return;
+            container.innerHTML = `
+                <div class="visualizer-title"><span>RoPE：位置越後面，向量旋轉越多</span></div>
+                <div class="rope-stage">
+                    <svg class="rope-canvas" viewBox="0 0 260 220" id="rope-svg">
+                        <circle cx="130" cy="110" r="80" fill="none" stroke="var(--border-color)"/>
+                        <line x1="50" y1="110" x2="210" y2="110" stroke="var(--border-color)"/>
+                        <line x1="130" y1="30" x2="130" y2="190" stroke="var(--border-color)"/>
+                        <line id="rope-vector" x1="130" y1="110" x2="200" y2="110" stroke="#a855f7" stroke-width="4" stroke-linecap="round"/>
+                        <circle id="rope-dot" cx="200" cy="110" r="6" fill="#a855f7"/>
+                        <text x="130" y="205" text-anchor="middle" fill="var(--text-secondary)" font-size="11">旋轉後的 Q/K 向量</text>
+                    </svg>
+                    <div>
+                        <div class="slider-group"><label>Position m = <span id="rope-pos-val">0</span></label><input id="rope-pos" type="range" min="0" max="12" value="0"></div>
+                        <div class="slider-group"><label>Base angle θ = <span id="rope-theta-val">22.5°</span></label><input id="rope-theta" type="range" min="10" max="45" value="22.5" step="2.5"></div>
+                        <div class="viz-output" id="rope-info"></div>
+                    </div>
+                </div>
+            `;
+            document.getElementById('rope-pos').addEventListener('input', render);
+            document.getElementById('rope-theta').addEventListener('input', render);
+            function render() {
+                const pos = +document.getElementById('rope-pos').value;
+                const thetaDeg = +document.getElementById('rope-theta').value;
+                const angle = pos * thetaDeg * Math.PI / 180;
+                const x = 130 + Math.cos(angle) * 70;
+                const y = 110 - Math.sin(angle) * 70;
+                document.getElementById('rope-vector').setAttribute('x2', x.toFixed(2));
+                document.getElementById('rope-vector').setAttribute('y2', y.toFixed(2));
+                document.getElementById('rope-dot').setAttribute('cx', x.toFixed(2));
+                document.getElementById('rope-dot').setAttribute('cy', y.toFixed(2));
+                document.getElementById('rope-pos-val').textContent = pos;
+                document.getElementById('rope-theta-val').textContent = `${thetaDeg}°`;
+                document.getElementById('rope-info').innerHTML = `旋轉角度 mθ = ${pos} × ${thetaDeg}° = <strong>${(pos * thetaDeg).toFixed(1)}°</strong><br>RoPE 套用後 shape 不變：<span class="viz-code">(B, H, T, D)</span>`;
+            }
+            render();
+        }
+
+        // --- 8. KV Cache Timeline Visualizer ---
+        function initKvCacheVisualizer() {
+            const container = document.getElementById('kv-cache-visualizer');
+            if (!container) return;
+            const prompt = ['我', '喜歡'];
+            const generated = ['學', 'AI', '的', '原理'];
+            let step = 0;
+            container.innerHTML = `
+                <div class="visualizer-title">
+                    <span>KV Cache Timeline：每次 decode 只新增一格 K/V</span>
+                    <button class="btn" id="btn-kv-step">Decode 下一個 token</button>
+                </div>
+                <p class="viz-note">Prefill 先建立 prompt 的 K/V cache；decode 階段每次只 append 新 token 的 K/V。</p>
+                <div><strong>K cache</strong><div class="cache-row" id="k-cache-row"></div></div>
+                <div><strong>V cache</strong><div class="cache-row" id="v-cache-row"></div></div>
+                <div class="viz-output" id="kv-cache-info"></div>
+            `;
+            document.getElementById('btn-kv-step').addEventListener('click', () => {
+                step = (step + 1) % (generated.length + 1);
+                render();
+            });
+            function render() {
+                const tokens = prompt.concat(generated.slice(0, step));
+                const rows = ['k-cache-row', 'v-cache-row'];
+                rows.forEach(rowId => {
+                    const row = document.getElementById(rowId);
+                    row.innerHTML = '';
+                    tokens.forEach((tok, i) => {
+                        const el = document.createElement('span');
+                        el.className = `cache-token ${i === tokens.length - 1 && step > 0 ? 'new' : ''}`;
+                        el.textContent = `${tok} ${rowId[0].toUpperCase()}`;
+                        row.appendChild(el);
+                    });
+                });
+                const pastLen = tokens.length;
+                document.getElementById('kv-cache-info').innerHTML = `目前 cache length = <strong>${pastLen}</strong><br>K/V shape: <span class="viz-code">(B, H, ${pastLen}, D)</span><br>本步 attention scores: <span class="viz-code">(B, H, 1, ${pastLen})</span>`;
+            }
+            render();
+        }
+
+        // --- 9. Mini Decoder-only LLM Forward Visualizer ---
+        function initMiniLlmVisualizer() {
+            const container = document.getElementById('mini-llm-visualizer');
+            if (!container) return;
+            const layers = [
+                ['input_ids', '(B=1, T=4)', '[3, 8, 12, 20]'],
+                ['Token Embedding', '(1, 4, C=8)', '查表成向量'],
+                ['Block 1: RMSNorm → MHA → Residual', '(1, 4, 8)', '交換 token 資訊'],
+                ['Block 1: RMSNorm → SwiGLU → Residual', '(1, 4, 8)', '非線性轉換'],
+                ['Block 2', '(1, 4, 8)', '重複堆疊'],
+                ['Final RMSNorm', '(1, 4, 8)', '輸出前穩定化'],
+                ['LM Head', '(1, 4, V=32)', '投影到 vocabulary'],
+                ['Next Token', 'logits[:, -1, :]', '選出「原理」']
+            ];
+            container.innerHTML = `
+                <div class="visualizer-title">
+                    <span>Mini Decoder-only LLM Forward Pass</span>
+                    <button class="btn" id="btn-mini-llm">下一層</button>
+                </div>
+                <div class="mini-llm-layers" id="mini-llm-layers"></div>
+                <div class="viz-output" id="mini-llm-info">按「下一層」觀察資料 shape 如何流動。</div>
+            `;
+            const box = document.getElementById('mini-llm-layers');
+            layers.forEach(([name, shape, desc], i) => {
+                const el = document.createElement('div');
+                el.className = 'mini-layer';
+                el.id = `mini-layer-${i}`;
+                el.innerHTML = `<strong>${i + 1}. ${name}</strong><span class="viz-code">${shape}</span><span style="color:var(--text-secondary)">${desc}</span>`;
+                box.appendChild(el);
+            });
+            let idx = -1;
+            document.getElementById('btn-mini-llm').addEventListener('click', () => {
+                idx = (idx + 1) % layers.length;
+                document.querySelectorAll('.mini-layer').forEach((el, i) => el.classList.toggle('active', i === idx));
+                const [name, shape, desc] = layers[idx];
+                document.getElementById('mini-llm-info').innerHTML = `<strong>${name}</strong><br>Shape: <span class="viz-code">${shape}</span><br>${desc}`;
+            });
+        }
+
 
         // Initialize Page
         window.addEventListener('DOMContentLoaded', loadBook);
